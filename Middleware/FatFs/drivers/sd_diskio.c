@@ -173,8 +173,8 @@ DRESULT SD_ioctl(BYTE lun, BYTE cmd, void *buff)
   /* Get number of sectors on the disk (DWORD) */
   case GET_SECTOR_COUNT :
     BSP_SD_GetCardInfo(&CardInfo);
-    //*(DWORD*)buff = CardInfo.CardCapacity / BLOCK_SIZE;
-		*(DWORD*)buff = CardInfo.CardCapacity / (BLOCK_SIZE * 1024);
+    *(DWORD*)buff = CardInfo.CardCapacity / BLOCK_SIZE;
+		//*(DWORD*)buff = CardInfo.CardCapacity / (BLOCK_SIZE * 1024);
     res = RES_OK;
     break;
   
