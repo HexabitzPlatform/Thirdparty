@@ -36,7 +36,7 @@
  */
 
 /*
-		MODIFIED by Hexabitz for BitzOS (BOS) V0.0.0 - Copyright (C) 2016 Hexabitz
+		MODIFIED by Hexabitz for BitzOS (BOS) V0.1.0 - Copyright (C) 2017 Hexabitz
     All rights reserved
 */
 
@@ -50,6 +50,8 @@
 
 /* Utils includes. */
 #include "FreeRTOS_CLI.h"
+
+#include "BOS.h"
 
 typedef struct xCOMMAND_INPUT_LIST
 {
@@ -73,9 +75,9 @@ of the list of registered commands. */
 static const CLI_Command_Definition_t xHelpCommand =		
 {
 	( const int8_t * ) "help",
-	( const int8_t * ) "\r\nhelp:\r\n Lists all the registered commands\r\n\r\n",
+	( const int8_t * ) "\r\nhelp:\r\n Lists all the registered commands. Type 'help params' to list available parameters and their possible values\r\n\r\n",
 	prvHelpCommand,
-	0
+	-1 /* Variable number of parameters is expected. */
 };
 
 /* The definition of the list of commands.  Commands that are registered are
@@ -279,30 +281,64 @@ const int8_t *pcReturn = NULL;
 static portBASE_TYPE prvHelpCommand( int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString )
 {
 static const CLI_Definition_List_Item_t * pxCommand = NULL;
-signed portBASE_TYPE xReturn;
+signed portBASE_TYPE xReturn; 
+static uint8_t str;
+static int8_t *pcParameterString1; 
+portBASE_TYPE xParameterStringLength1 = 0;
+	
+	/* Obtain the 1st parameter string: The set parameter */
+	pcParameterString1 = ( int8_t * ) FreeRTOS_CLIGetParameter (pcCommandString, 1, &xParameterStringLength1);
 
-	( void ) pcCommandString;
-
-	if( pxCommand == NULL )
+	
+	/* List parameters */
+	if (pcParameterString1 != NULL && !strncmp((const char *)pcParameterString1, "params", 6))
 	{
-		/* Reset the pxCommand pointer back to the start of the list. */
-		pxCommand = &xRegisteredCommands;
+		if( str == NumOfParamsHelpStrings )
+		{
+			/* Reset the pointer back to the start of the list. */
+			str = 0;
+		}	
+	
+		/* Return the next command help string, before moving the pointer on to
+		the next command in the list. */
+		strncpy( ( char * ) pcWriteBuffer, ( const char * )pcParamsHelpString[str++], xWriteBufferLen );
+
+		if( str == NumOfParamsHelpStrings )
+		{
+			/* There are no more parameters in the list, so there will be no more
+			strings to return after this one and pdFALSE should be returned. */
+			xReturn = pdFALSE; str = 0;
+		}
+		else
+		{
+			xReturn = pdTRUE;
+		}		
 	}
+	/* List CLI Commands */
+	else if (pcParameterString1 == NULL)
+	{		
+		if( pxCommand == NULL )
+		{
+			/* Reset the pxCommand pointer back to the start of the list. */
+			pxCommand = &xRegisteredCommands;
+		}
 
-	/* Return the next command help string, before moving the pointer on to
-	the next command in the list. */
-	strncpy( ( char * ) pcWriteBuffer, ( const char * ) pxCommand->pxCommandLineDefinition->pcHelpString, xWriteBufferLen );
-	pxCommand = pxCommand->pxNext;
+		/* Return the next command help string, before moving the pointer on to
+		the next command in the list. */
+		strncpy( ( char * ) pcWriteBuffer, ( const char * ) pxCommand->pxCommandLineDefinition->pcHelpString, xWriteBufferLen );
+		pxCommand = pxCommand->pxNext;
+		
 
-	if( pxCommand == NULL )
-	{
-		/* There are no more commands in the list, so there will be no more
-		strings to return after this one and pdFALSE should be returned. */
-		xReturn = pdFALSE;
-	}
-	else
-	{
-		xReturn = pdTRUE;
+		if( pxCommand == NULL )
+		{
+			/* There are no more commands in the list, so there will be no more
+			strings to return after this one and pdFALSE should be returned. */
+			xReturn = pdFALSE;
+		}
+		else
+		{
+			xReturn = pdTRUE;
+		}
 	}
 
 	return xReturn;
