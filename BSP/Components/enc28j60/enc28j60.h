@@ -38,6 +38,11 @@
   *
   ******************************************************************************
   */
+	
+/*
+		MODIFIED by Hexabitz for BitzOS (BOS) V0.1.4 - Copyright (C) 2017 Hexabitz
+    All rights reserved
+*/
 
 #ifndef __ENC28J60_H
 #define __ENC28J60_H
@@ -45,7 +50,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "H17R0.h"
+#include "BOS.h"
 
 #ifndef NULL
 #define NULL ((void *)0)
