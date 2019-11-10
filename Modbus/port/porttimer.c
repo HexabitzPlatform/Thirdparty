@@ -63,7 +63,7 @@
 #endif
 
 /* ----------------------- Static variables ---------------------------------*/
-extern TIM_HandleTypeDef htim7;
+extern TIM_HandleTypeDef htim16;
 uint16_t timeout = 0;
 uint16_t downcounter = 0;
 
@@ -73,21 +73,26 @@ xMBPortTimersInit( USHORT usTim1Timerout50us )
 {
 	TIM_MasterConfigTypeDef sMasterConfig;
   
-  htim7.Instance = TIM7;
-  htim7.Init.Prescaler = (HAL_RCC_GetPCLK1Freq() / 1000000) - 1;
-  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim7.Init.Period = 50 - 1;
+	/* Peripheral clock enable */
+	__TIM16_CLK_ENABLE();
+	
+	/* Peripheral configuration */
+  htim16.Instance = TIM16;
+  htim16.Init.Prescaler = (HAL_RCC_GetPCLK1Freq() / 1000000) - 1;
+  htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim16.Init.Period = 50 - 1;
+	htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   
   timeout = usTim1Timerout50us;
 
-  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
   {
     return FALSE;
   }
   
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim16, &sMasterConfig) != HAL_OK)
   {
     return FALSE;
   }
@@ -100,7 +105,7 @@ vMBPortTimerClose( void )
 {
     //NVIC_DisableIRQ( &htim7 );
     //PMC_DisablePeripheral( ID_TC0 );
-	HAL_TIM_Base_DeInit(&htim7);
+	HAL_TIM_Base_DeInit(&htim16);
 }
 
 void
@@ -108,7 +113,7 @@ vMBPortTimersEnable(  )
 {
 /* Enable the timer with the timeout passed to xMBPortTimersInit( ) */
   downcounter = timeout;
-  HAL_TIM_Base_Start_IT(&htim7);
+  HAL_TIM_Base_Start_IT(&htim16);
 
 }
 
@@ -116,7 +121,7 @@ void
 vMBPortTimersDisable(  )
 {
   /* Disable any pending timers. */
-  HAL_TIM_Base_Stop_IT(&htim7);
+HAL_TIM_Base_Stop_IT(&htim16);
 }
 
 void
