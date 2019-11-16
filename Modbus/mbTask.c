@@ -43,8 +43,6 @@ void ModbusRTUTask(void const * argument)
   usRegInputBuf[6] = 77;
   usRegInputBuf[7] = 88;  
   
-  eMBErrorCode eStatus = eMBInit( MB_RTU, 0x0A, 1, 38400, MB_PAR_NONE );
-  eStatus = eMBEnable();
   
   while(1) {
     eMBPoll();           
