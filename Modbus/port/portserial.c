@@ -160,7 +160,7 @@ xMBPortSerialPutByte( CHAR ucByte )
   /* Put a byte in the UARTs transmit buffer. This function is called
   * by the protocol stack if pxMBFrameCBTransmitterEmpty( ) has been
   * called. */
-  return (HAL_OK == HAL_UART_Transmit(&huart1, (uint8_t*)&ucByte, 1, 10));
+  return (HAL_OK == HAL_UART_Transmit(&huart1, (uint8_t*)&ucByte, sizeof(ucByte), 10));
 
 }
 
