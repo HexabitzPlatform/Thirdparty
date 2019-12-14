@@ -45,7 +45,8 @@ void ModbusRTUTask(void const * argument)
   
   
   while(1) {
-    eMBPoll();           
+    eMBPoll();   
+		Delay_ms(10);		
   }
 }
 
