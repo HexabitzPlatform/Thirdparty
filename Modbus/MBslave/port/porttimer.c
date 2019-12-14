@@ -25,6 +25,7 @@
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 #include "mbport.h"
+#include "H1DR1.h"
 
 /* ----------------------- static functions ---------------------------------*/
 static void prvvTIMERExpiredISR( void );
@@ -36,7 +37,7 @@ xMBPortTimersInit( USHORT usTim1Timerout50us )
 
 MX_TIM16_Init();
 
-if (HAL_TIM_Base_Init(&htim!=HAL_OK))
+if (HAL_TIM_Base_Init(&htim16)!=HAL_OK)
 {
 return FALSE;
 }

@@ -9,8 +9,9 @@
 #ifndef _MB_PORT_H
 #define _MB_PORT_H
 
+#include "BOS.h"
 #include <assert.h>
-#include "stm32f0xx_hal.h"
+
 
 #ifdef __cplusplus
 extern          "C"

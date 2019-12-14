@@ -24,6 +24,7 @@
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 #include "mbport.h"
+#include "H1DR1.h"
 
 /* ----------------------- static functions ---------------------------------*/
 static void prvvUARTTxReadyISR( void );
@@ -38,11 +39,11 @@ vMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable )
      */
 if (xRxEnable)
 {
-__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXE);
+__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
 RS485_RECEIVER_EN();
 }
 else {
-__HAL_UART_DISABLE_IT(&huart1, UART_IT_RXE);
+__HAL_UART_DISABLE_IT(&huart1, UART_IT_RXNE);
 RS485_RECEIVER_DIS();
 }
 if (xTxEnable)
@@ -52,6 +53,7 @@ RS485_RECEIVER_DIS();
 }
 else {
 __HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
+}
 }
 
 BOOL
@@ -65,9 +67,9 @@ xMBPortSerialInit( UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
 	uint32_t data_bits;
 	uint32_t parity_bit;
 	/* Verify the value of baud rate */
-	if (ulBaudRate!=9600  && ulBaudRate!=18200  && ulBaudRate!=38400)
+	if (ulBaudRate!=9600  && ulBaudRate!=18200  && ulBaudRate!=38400){
 		return FALSE;
-	else
+	}else
 	{
 	switch(ulBaudRate)
 	{
@@ -78,9 +80,9 @@ xMBPortSerialInit( UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
 	}
 	}	
 	/* Verify the value of baud rate */
-	if (data_bits!=UART_WORDLENGTH_7B  && data_bits!=UART_WORDLENGTH_8B)
+	if (data_bits!=UART_WORDLENGTH_7B  && data_bits!=UART_WORDLENGTH_8B){
 		return FALSE;
-	else
+	}else
 	{
 	switch(data_bits)
 	{
@@ -90,11 +92,8 @@ xMBPortSerialInit( UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
 	}
 	}
 	/* Verify the value of parity */
-	if (eParity!=UART_PARITY_NONE  && eParity!=UART_PARITY_EVEN  && ulBaudRate!=UART_PARITY_ODD)
-		return FALSE;
-	else
-	{
-	switch(eParity)
+	if (eParity==UART_PARITY_NONE  || eParity==UART_PARITY_EVEN  || eParity==UART_PARITY_ODD){
+			switch(eParity)
 	{
 		case(UART_PARITY_NONE): parity_bit=UART_PARITY_NONE; break;
 		case(UART_PARITY_EVEN): parity_bit=UART_PARITY_EVEN; break;
@@ -104,7 +103,10 @@ xMBPortSerialInit( UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
 	
 	MB_PORT_Init(baud_rate,data_bits, parity_bit);
 	
-	return TRUE;
+		return TRUE;
+	}else
+	{
+	return FALSE;
 	}
 }
 
