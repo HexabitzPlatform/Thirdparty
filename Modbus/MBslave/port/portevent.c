@@ -22,7 +22,6 @@
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 #include "mbport.h"
-#include "BOS.h"
 
 /* ----------------------- Variables ----------------------------------------*/
 static eMBEventType eQueuedEvent;
@@ -32,47 +31,27 @@ static BOOL     xEventInQueue;
 BOOL
 xMBPortEventInit( void )
 {
-    BOOL            bStatus = FALSE;
-    if( 0 != ( xQueueHdl = xQueueCreate( 1, sizeof( eMBEventType ) ) ) )
-    {
-        bStatus = TRUE;
-    }
-    return bStatus;
-}
-
-void
-vMBPortEventClose( void )
-{
-    if( 0 != xQueueHdl )
-    {
-        vQueueDelete( xQueueHdl );
-        xQueueHdl = 0;
-    }
+    xEventInQueue = FALSE;
+    return TRUE;
 }
 
 BOOL
 xMBPortEventPost( eMBEventType eEvent )
 {
-    BOOL            bStatus = TRUE;
-    if( bMBPortIsWithinException(  ) )
-    {
-        ( void )xQueueSendFromISR( xQueueHdl, ( const void * )&eEvent, pdFALSE );
-    }
-    else
-    {
-        ( void )xQueueSend( xQueueHdl, ( const void * )&eEvent, pdFALSE );
-    }
-
-    return bStatus;
+    xEventInQueue = TRUE;
+    eQueuedEvent = eEvent;
+    return TRUE;
 }
 
 BOOL
-xMBPortEventGet( eMBEventType * peEvent )
+xMBPortEventGet( eMBEventType * eEvent )
 {
     BOOL            xEventHappened = FALSE;
 
-    if( pdTRUE == xQueueReceive( xQueueHdl, peEvent, portTICK_RATE_MS * 50 ) )
+    if( xEventInQueue )
     {
+        *eEvent = eQueuedEvent;
+        xEventInQueue = FALSE;
         xEventHappened = TRUE;
     }
     return xEventHappened;

@@ -20,11 +20,11 @@
  */
 
 #include "port.h"
+#include "BOS.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 #include "mbport.h"
-#include "H1DR1.h"
 
 /* ----------------------- static functions ---------------------------------*/
 static void prvvUARTTxReadyISR( void );
