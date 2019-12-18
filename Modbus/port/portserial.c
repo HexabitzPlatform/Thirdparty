@@ -130,7 +130,7 @@ xMBPortSerialInit( UCHAR ucPORT, ULONG ulBaudRate, UCHAR ucDataBits, eMBParity e
   Do nothing, Initialization is handled by MX_USART1_UART_Init() 
   Fixed port, baudrate, databit and parity  
   */
-	MB_PORT_Init();
+	//MB_PORT_Init();
   return TRUE;
 
 }
