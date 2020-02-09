@@ -184,8 +184,8 @@ eMBPSerialRxEnable( xMBPSerialHandle xSerialHdl, pvMBPSerialReceiverCB pvMBPRece
     return eStatus;
 }
 
-STATIC void 
-prrvUSARTTxISR( void )
+ void 
+prrvUSARTTxISR( void )           //STATIC
 {
     BOOL            bHasMoreData = TRUE;
     UBYTE           ubTxByte;
@@ -206,8 +206,8 @@ prrvUSARTTxISR( void )
     }
 }
 
-STATIC void 
-prrvUSARTRxISR( void )
+ void 
+prrvUSARTRxISR( void )           //STATIC
 {
     UBYTE           ubUDR = 0; /* TODO: Get byte from UART. */;
 

@@ -169,7 +169,7 @@ eMBPTimerStop( xMBPTimerHandle xTimerHdl )
     return eStatus;
 }
 
-STATIC void prvvTimerISR( void )     //extern void
+ void prvvTimerISR( void )     //STATIC void
 {
     UBYTE           ubIdx;
 
