@@ -36,7 +36,7 @@
  */
 
 /*
-		MODIFIED by Hexabitz for BitzOS (BOS) V0.1.6 - Copyright (C) 2017-2019 Hexabitz
+		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.0 - Copyright (C) 2017-2019 Hexabitz
     All rights reserved
 */
 
@@ -282,7 +282,7 @@ static portBASE_TYPE prvHelpCommand( int8_t *pcWriteBuffer, size_t xWriteBufferL
 {
 static const CLI_Definition_List_Item_t * pxCommand = NULL;
 signed portBASE_TYPE xReturn; 
-static uint8_t str;
+static uint8_t str, counter;
 static int8_t *pcParameterString1; 
 portBASE_TYPE xParameterStringLength1 = 0;
 	
@@ -321,13 +321,21 @@ portBASE_TYPE xParameterStringLength1 = 0;
 		{
 			/* Reset the pxCommand pointer back to the start of the list. */
 			pxCommand = &xRegisteredCommands;
+			counter = 1;
 		}
 
 		/* Return the next command help string, before moving the pointer on to
-		the next command in the list. */
-		strncpy( ( char * ) pcWriteBuffer, ( const char * ) pxCommand->pxCommandLineDefinition->pcHelpString, xWriteBufferLen );
+		the next command in the list. */	
+		if (counter > numOfBosCommands) {
+			strncpy( 8 + ( char * ) pcWriteBuffer, ( const char * ) pxCommand->pxCommandLineDefinition->pcHelpString, xWriteBufferLen-8 );
+			strcpy(1 + ( char * ) pcWriteBuffer, ( char * ) modulePNstring[modulePN]);
+			pcWriteBuffer[0] = '('; pcWriteBuffer[6] = ')'; pcWriteBuffer[7] = ' ';
+		} else {
+			strncpy( ( char * ) pcWriteBuffer, ( const char * ) pxCommand->pxCommandLineDefinition->pcHelpString, xWriteBufferLen );
+		}				
+				
 		pxCommand = pxCommand->pxNext;
-		
+		counter++;
 
 		if( pxCommand == NULL )
 		{
