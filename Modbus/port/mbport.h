@@ -45,6 +45,9 @@ extern          "C"
 #define MBP_SERIALHDL_INVALID               NULL
 #define MBP_TCPHDL_INVALID                  NULL
 #define MBP_TCPHDL_CLIENT_INVALID           NULL
+		
+#define MB_UART_1                       1
+#define MB_UART_2                       2
 
 /* ----------------------- Function prototypes ------------------------------*/
 
