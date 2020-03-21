@@ -10,8 +10,8 @@
 #include <stdlib.h>
 
 /* ----------------------- Platform includes --------------------------------*/
-#include "mbport.h"
 #include "H1DR1.h"
+#include "mbport.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "common/mbtypes.h"
@@ -99,14 +99,9 @@ STATIC BOOL     bIsInitalized = FALSE;
 
 /* ----------------------- Static functions ---------------------------------*/
 void            vMBPUSART1ISR( void ) __attribute__ ( ( __interrupt__ ) );
-STATIC void     prvvMBPUSART1_TXE_ISR( void );
-STATIC void     prvvMBPUSART1_TC_ISR( void );
-STATIC void     prvvMBPUSART1_RXNE_ISR( void );
-
-void            vMBPUSART2ISR( void ) __attribute__ ( ( __interrupt__ ) );
-STATIC void     prvvMBPUSART2_TXE_ISR( void );
-STATIC void     prvvMBPUSART2_TC_ISR( void );
-STATIC void     prvvMBPUSART2_RXNE_ISR( void );
+void     prvvMBPUSART1_TXE_ISR( void );  //STATIC
+void     prvvMBPUSART1_TC_ISR( void );   //STATIC
+void     prvvMBPUSART1_RXNE_ISR( void );  //STATIC
 
 /* ----------------------- Start implementation -----------------------------*/
 
@@ -117,7 +112,7 @@ eMBPSerialInit( xMBPSerialHandle * pxSerialHdl, UCHAR ucPort, ULONG ulBaudRate,
     eMBErrorCode    eStatus = MB_ENOERR;
     UBYTE           ubIdx;
 	
-    // added by Hexabitz firmware
+    // added by Hexabitz H1DR1 firmware
 		uint32_t BaudRate;
 		uint32_t DataBits;
 		uint32_t Parity;
@@ -225,7 +220,7 @@ eMBPSerialInit( xMBPSerialHandle * pxSerialHdl, UCHAR ucPort, ULONG ulBaudRate,
                 if( IDX_INVALID == xSerialHdls[UART_1_IDX].ubIdx )
                 {
                     /* Configure  USART1 */
-                    MB_PORT_Init(ulBaudRate, DataBits, Parity, StopBit);
+                    MB_PORT_Init(BaudRate, DataBits, Parity, StopBit);
 									
                     /* Disable receive and transmit interrupts from the beginning */
                     //USART_ITConfig( USART1, USART_IT_RXNE, DISABLE );
@@ -291,15 +286,50 @@ eMBPSerialClose( xMBPSerialHandle xSerialHdl )
     MBP_ENTER_CRITICAL_SECTION(  );
     if( MB_IS_VALID_HDL( pxSerialIntHdl, xSerialHdls ) )
     {
-        if( ( pxSerialIntHdl->pbMBPTransmitterEmptyFN == NULL ) && ( pxSerialIntHdl->pvMBPReceiveFN == NULL ) )
+        switch ( pxSerialIntHdl->ubIdx )
         {
-            /* TODO: Close the serial port here. */
-            HAL_UART_DeInit(&huart1);
-						eStatus = MB_ENOERR;
-        }
-        else
-        {
-            eStatus = MB_EAGAIN;
+#if UART_1_ENABLED == 1
+        case UART_1_IDX:
+            if( ( NULL == pxSerialIntHdl->pbMBMTransmitterEmptyFN ) && ( NULL == pxSerialIntHdl->pvMBMReceiveFN ) )
+            {
+                /* Close USART 1 */
+                HAL_UART_DeInit(&huart1);
+                /* Force RS485 back to receive mode */
+                RS_485_UART_1_DISABLE_TX(  );
+                /* Reset handle */
+                HDL_RESET( pxSerialIntHdl );
+                /* No error */
+                eStatus = MB_ENOERR;
+            }
+            else
+            {
+                eStatus = MB_EIO;
+            }
+            break;
+#endif
+#if UART_2_ENABLED == 1
+        case UART_2_IDX:
+            if( ( NULL == pxSerialIntHdl->pbMBMTransmitterEmptyFN ) && ( NULL == pxSerialIntHdl->pvMBMReceiveFN ) )
+            {
+                /* Close USART 1 */
+                USART_Cmd( USART2, DISABLE );
+                USART_DeInit( USART2 );
+                /* Force RS485 back to receive mode */
+                RS_485_UART_2_DISABLE_TX(  );
+                /* Reset handle */
+                HDL_RESET( pxSerialIntHdl );
+                /* No error */
+                eStatus = MB_ENOERR;
+            }
+            else
+            {
+                eStatus = MB_EIO;
+            }
+            break;
+#endif
+        default:
+            MBP_ASSERT( 0 );
+            break;
         }
     }
     MBP_EXIT_CRITICAL_SECTION(  );
@@ -307,7 +337,7 @@ eMBPSerialClose( xMBPSerialHandle xSerialHdl )
 }
 
 eMBErrorCode
-eMBPSerialTxEnable( xMBPSerialHandle xSerialHdl, pbMBPSerialTransmitterEmptyCB pbMBPTransmitterEmptyFN )
+eMBPSerialTxEnable( xMBPSerialHandle xSerialHdl, pbMBPSerialTransmitterEmptyCB pbMBMTransmitterEmptyFN )
 {
     eMBErrorCode    eStatus = MB_EINVAL;
     xSerialHandle  *pxSerialIntHdl = xSerialHdl;
@@ -316,24 +346,61 @@ eMBPSerialTxEnable( xMBPSerialHandle xSerialHdl, pbMBPSerialTransmitterEmptyCB p
     if( MB_IS_VALID_HDL( pxSerialIntHdl, xSerialHdls ) )
     {
         eStatus = MB_ENOERR;
-        if( NULL != pbMBPTransmitterEmptyFN )
+        if( NULL != pbMBMTransmitterEmptyFN )
         {
-            MBP_ASSERT( NULL == pxSerialIntHdl->pbMBPTransmitterEmptyFN );
-            pxSerialIntHdl->pbMBPTransmitterEmptyFN = pbMBPTransmitterEmptyFN;
-            
-            /* TODO: Enable the transmitter. */   
-						__HAL_UART_ENABLE_IT(&huart1, UART_IT_TXE);
-						RS485_RECEIVER_DIS();
+            MBP_ASSERT( NULL == pxSerialIntHdl->pbMBMTransmitterEmptyFN );
+            pxSerialIntHdl->pbMBMTransmitterEmptyFN = pbMBMTransmitterEmptyFN;
+            switch ( pxSerialIntHdl->ubIdx )
+            {
+#if UART_1_ENABLED == 1
+            case UART_1_IDX:
+                /* RS485 transmit mode */
+                RS_485_UART_1_ENABLE_TX(  );
+                /* Enable USART 1 tx interrupt */
+								__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
+								RS485_RECEIVER_DIS();
+                break;
+#endif
+#if UART_2_ENABLED == 1
+            case UART_2_IDX:
+                /* RS485 transmit mode */
+                RS_485_UART_2_ENABLE_TX(  );
+                /* Enable USART 2 tx interrupt */
+                USART_ITConfig( USART2, USART_IT_TXE, ENABLE );
+                break;
+#endif
+            default:
+                MBP_ASSERT( 0 );
+            }
 
         }
         else
         {
-            pxSerialIntHdl->pbMBPTransmitterEmptyFN = NULL;
-            
-            /* TODO: Disable the transmitter. Make sure that all characters have been
-             * transmitted in case you do any buffering internally.
+            pxSerialIntHdl->pbMBMTransmitterEmptyFN = NULL;
+            /* The transmitter is disable when the last frame has been sent.
+             * This is necessary for RS485 with a half-duplex bus.
              */
-						__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
+            switch ( pxSerialIntHdl->ubIdx )
+            {
+#if UART_1_ENABLED == 1
+            case UART_1_IDX:
+                /* Disable transmit register empty interrupt */
+								__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
+                /* Enable transmit complete interrupt */
+								__HAL_UART_DISABLE_IT(&huart1, UART_IT_TC);
+                break;
+#endif
+#if UART_2_ENABLED == 1
+            case UART_2_IDX:
+                /* Disable transmit register empty interrupt */
+                USART_ITConfig( USART2, USART_IT_TXE, DISABLE );
+                /* Enable transmit complete interrupt */
+                USART_ITConfig( USART2, USART_IT_TC, ENABLE );
+                break;
+#endif
+            default:
+                MBP_ASSERT( 0 );
+            }
         }
     }
     MBP_EXIT_CRITICAL_SECTION(  );
@@ -341,7 +408,7 @@ eMBPSerialTxEnable( xMBPSerialHandle xSerialHdl, pbMBPSerialTransmitterEmptyCB p
 }
 
 eMBErrorCode
-eMBPSerialRxEnable( xMBPSerialHandle xSerialHdl, pvMBPSerialReceiverCB pvMBPReceiveFN )
+eMBPSerialRxEnable( xMBPSerialHandle xSerialHdl, pvMBPSerialReceiverCB pvMBMReceiveFN )
 {
     eMBErrorCode    eStatus = MB_EINVAL;
     xSerialHandle  *pxSerialIntHdl = xSerialHdl;
@@ -350,59 +417,199 @@ eMBPSerialRxEnable( xMBPSerialHandle xSerialHdl, pvMBPSerialReceiverCB pvMBPRece
     if( MB_IS_VALID_HDL( pxSerialIntHdl, xSerialHdls ) )
     {
         eStatus = MB_ENOERR;
-        if( NULL != pvMBPReceiveFN )
+        if( NULL != pvMBMReceiveFN )
         {
-            MBP_ASSERT( NULL == pxSerialIntHdl->pvMBPReceiveFN );
-            pxSerialIntHdl->pvMBPReceiveFN = pvMBPReceiveFN;
-            
-            /* TODO: Enable the receiver. */
-						__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
-						RS485_RECEIVER_EN();
-
+            MBP_ASSERT( NULL == pxSerialIntHdl->pvMBMReceiveFN );
+            pxSerialIntHdl->pvMBMReceiveFN = pvMBMReceiveFN;
+            switch ( pxSerialIntHdl->ubIdx )
+            {
+#if UART_1_ENABLED == 1
+            case UART_1_IDX:
+                /* Enable USART 1 receive interrupt */
+                __HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
+								RS485_RECEIVER_EN();
+                break;
+#endif
+#if UART_2_ENABLED == 1
+            case UART_2_IDX:
+                /* Enable USART 2 receive interrupt */
+                USART_ITConfig( USART2, USART_IT_RXNE, ENABLE );
+                break;
+#endif
+            default:
+                MBP_ASSERT( 0 );
+            }
         }
         else
         {
-            pxSerialIntHdl->pvMBPReceiveFN = NULL;
-            
-            /* TODO: Disable the receiver. */
-						__HAL_UART_DISABLE_IT(&huart1, UART_IT_RXNE);
-						RS485_RECEIVER_DIS();
+            pxSerialIntHdl->pvMBMReceiveFN = NULL;
+            switch ( pxSerialIntHdl->ubIdx )
+            {
+#if UART_1_ENABLED == 1
+            case UART_1_IDX:
+                /* Disable USART 1 receive interrupt */
+                __HAL_UART_DISABLE_IT(&huart1, UART_IT_RXNE);
+								RS485_RECEIVER_DIS();
+                break;
+#endif
+#if UART_2_ENABLED == 1
+            case UART_2_IDX:
+                /* Disable USART 2 receive interrupt */
+                USART_ITConfig( USART2, USART_IT_RXNE, DISABLE );
+                break;
+#endif
+            default:
+                MBP_ASSERT( 0 );
+            }
         }
     }
     MBP_EXIT_CRITICAL_SECTION(  );
     return eStatus;
 }
 
- void 
-prrvUSARTTxISR( void )           //STATIC
+//#if UART_1_ENABLED == 1
+//void
+//vMBPUSART1ISR( void )
+//{
+//    /* Check for receive interrupt */
+//    if( USART_GetITStatus( USART1, UART_IT_RXNE ) != RESET )
+//    {HAL_UART_GetState(&huart1);
+//        /* Handle data incomming data in modbus functions. Interrupt flag is 
+//         * cleared when byte is read in receive register.
+//         */
+//        prvvMBPUSART1_RXNE_ISR(  );
+//    }
+//    /* Check for transmit interrupt */
+//    if( USART_GetITStatus( USART1, USART_IT_TXE ) != RESET )
+//    {
+//        /* Handle transmission of data in modbus functions. Interrupt flags are
+//         * cleared when new byte is written to transmit register.
+//         */
+//        prvvMBPUSART1_TXE_ISR(  );
+//    }
+//    /* Check for transmit complete */
+//    if( USART_GetITStatus( USART1, UART_IT_TC ) != RESET )
+//    {
+//        /* Handle transmit complete in modbus library */
+//        prvvMBPUSART1_TC_ISR(  );
+//    }
+//}
+
+void
+prvvMBPUSART1_TXE_ISR( void )
 {
+    MBP_ASSERT( IDX_INVALID != xSerialHdls[UART_1_IDX].ubIdx );
     BOOL            bHasMoreData = TRUE;
     UBYTE           ubTxByte;
 
-    if( NULL != xSerialHdls[0].pbMBPTransmitterEmptyFN )
+    if( NULL != xSerialHdls[UART_1_IDX].pbMBMTransmitterEmptyFN )
     {
-        bHasMoreData = xSerialHdls[0].pbMBPTransmitterEmptyFN( xSerialHdls[0].xMBMHdl, &ubTxByte );
+        bHasMoreData = xSerialHdls[UART_1_IDX].pbMBMTransmitterEmptyFN( xSerialHdls[UART_1_IDX].xMBMHdl, &ubTxByte );
     }
     if( !bHasMoreData )
     {
-        xSerialHdls[0].pbMBPTransmitterEmptyFN = NULL;
-        
-        /* TODO: Disable the transmitter. */
+        xSerialHdls[UART_1_IDX].pbMBMTransmitterEmptyFN = NULL;
+        /* The transmitter is disabled when the last frame has been sent.
+         * This is necessary for RS485 with a hald-duplex bus.
+         */
+					__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
+					__HAL_UART_ENABLE_IT(&huart1, UART_IT_TC);
     }
     else
     {
-        /* TODO: Place byte ubTxByte in the UART data register. */
+        /* Transmit byte on USART */
+        HAL_UART_Transmit_IT( &huart1, &ubTxByte, sizeof (ubTxByte) );
     }
 }
 
- void 
-prrvUSARTRxISR( void )           //STATIC
+/* USART 1 Transmit Complete interrupt */
+void
+prvvMBPUSART1_TC_ISR( void )
 {
-    UBYTE           ubUDR = 0; /* TODO: Get byte from UART. */;
+    /* Back to receive mode */
+    RS_485_UART_1_DISABLE_TX(  );
+    /* Transmission complete. Disable interrupt */
+    __HAL_UART_DISABLE_IT(&huart1, UART_IT_TC);
+}
 
-    MBP_ASSERT( IDX_INVALID != xSerialHdls[0].ubIdx );
-    if( NULL != xSerialHdls[0].pvMBPReceiveFN )
+/* USART 1 Receive interrupt */
+void
+prvvMBPUSART1_RXNE_ISR( void )
+{
+    UBYTE           ubUDR;
+    FlagStatus      fs;
+
+    /* Read current flagstatus */
+    fs = RESET;
+    if( ((&huart1)->Instance->ISR, UART_FLAG_ORE) )
     {
-        xSerialHdls[0].pvMBPReceiveFN( xSerialHdls[0].xMBMHdl, ubUDR );
+        fs |= 1;
+    }
+		//UART_FLAG_NE
+    if( ((&huart1)->Instance->ISR, UART_FLAG_NE) )
+    {
+        fs |= 2;
+    }
+		//UART_FLAG_FE
+    if( ((&huart1)->Instance->ISR, UART_FLAG_FE) )
+    {
+        fs |= 4;
+    }
+		//UART_FLAG_PE
+    if( ((&huart1)->Instance->ISR, UART_FLAG_PE) )
+    {
+        fs |= 8;
+    }
+
+    /* Receive byte from USART1 */
+		HAL_UART_Receive_IT(&huart1, &ubUDR, sizeof (ubUDR));
+    //ubUDR = USART_ReceiveData( USART1 );
+
+    /* Send data to modbus functions
+     * if no error */
+    if( fs == RESET )
+    {
+        /* Pass received data on to modbuslib */
+        MBP_ASSERT( IDX_INVALID != xSerialHdls[UART_1_IDX].ubIdx );
+        if( NULL != xSerialHdls[UART_1_IDX].pvMBMReceiveFN )
+        {
+            xSerialHdls[UART_1_IDX].pvMBMReceiveFN( xSerialHdls[UART_1_IDX].xMBMHdl, ubUDR );
+        }
     }
 }
+
+
+///* void 
+//prrvUSARTTxISR( void )           //STATIC
+//{
+//    BOOL            bHasMoreData = TRUE;
+//    UBYTE           ubTxByte;
+
+//    if( NULL != xSerialHdls[0].pbMBPTransmitterEmptyFN )
+//    {
+//        bHasMoreData = xSerialHdls[0].pbMBPTransmitterEmptyFN( xSerialHdls[0].xMBMHdl, &ubTxByte );
+//    }
+//    if( !bHasMoreData )
+//    {
+//        xSerialHdls[0].pbMBPTransmitterEmptyFN = NULL;
+//        
+//        /* TODO: Disable the transmitter. */
+///*    }
+//    else
+//    {
+//        /* TODO: Place byte ubTxByte in the UART data register. */
+///*    }
+//}
+
+// void 
+//prrvUSARTRxISR( void )           //STATIC
+//{
+//    UBYTE           ubUDR = 0; /* TODO: Get byte from UART. */;
+
+///*    MBP_ASSERT( IDX_INVALID != xSerialHdls[0].ubIdx );
+//    if( NULL != xSerialHdls[0].pvMBPReceiveFN )
+//    {
+//        xSerialHdls[0].pvMBPReceiveFN( xSerialHdls[0].xMBMHdl, ubUDR );
+//    }
+//}
+//*/
