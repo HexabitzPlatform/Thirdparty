@@ -11,6 +11,7 @@
 
 /* ----------------------- Platform includes --------------------------------*/
 #include "mbport.h"
+#include "H1DR1.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "common/mbtypes.h"

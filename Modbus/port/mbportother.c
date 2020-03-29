@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include "FreeRTOS.h"
 #include "task.h"
-//#include <semphr.h>
+
 
 /* ----------------------- Platform includes --------------------------------*/
 #include "mbport.h"
+#include "H1DR1.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 

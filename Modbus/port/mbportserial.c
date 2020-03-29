@@ -10,8 +10,8 @@
 #include <stdlib.h>
 
 /* ----------------------- Platform includes --------------------------------*/
-#include "H1DR1.h"
 #include "mbport.h"
+#include "H1DR1.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "common/mbtypes.h"
@@ -26,7 +26,7 @@
 
 
 #define UART_1_ENABLED          ( 1 )   /*!< Set this to 1 to enable USART1 */
-#define UART_2_ENABLED          ( 0 )   /*!< Set this to 1 to enable USART2 */
+//#define UART_2_ENABLED          ( 0 )   /*!< Set this to 1 to enable USART2 */
 
 #if ( UART_1_ENABLED == 1 ) && ( UART_2_ENABLED == 1 )
 #define UART_1_PORT             ( MB_UART_1 )
@@ -38,12 +38,12 @@
 #define UART_1_PORT             ( MB_UART_1 )
 #define UART_1_IDX              ( 0 )
 #define NUARTS                  ( 1 )
-#elif ( UART_2_ENABLED == 1 )
+/*#elif ( UART_2_ENABLED == 1 )
 #define UART_2_PORT             ( MB_UART_2 )
 #define UART_2_IDX              ( 0 )
 #define NUARTS                  ( 1 )
 #else
-#define NUARTS                  ( 0 )
+#define NUARTS                  ( 0 )*/
 #endif
 
 #define RS_485_UART_1_INIT(  )	\
@@ -130,10 +130,10 @@ eMBPSerialInit( xMBPSerialHandle * pxSerialHdl, UCHAR ucPort, ULONG ulBaudRate,
         RS_485_UART_1_INIT(  );
         RS_485_UART_1_DISABLE_TX(  );
 #endif
-#if UART_2_ENABLED == 1
+/*#if UART_2_ENABLED == 1
         RS_485_UART_2_INIT(  );
         RS_485_UART_2_DISABLE_TX(  );
-#endif
+#endif*/
         bIsInitalized = TRUE;
     }
 
@@ -197,13 +197,13 @@ eMBPSerialInit( xMBPSerialHandle * pxSerialHdl, UCHAR ucPort, ULONG ulBaudRate,
         /* Setup parity */
         switch ( eParity )
         {
-        case MB_PARITY_N:
+        case MB_PAR_NONE:
             Parity = UART_PARITY_NONE;
             break;
-        case MB_PARITY_O:
+        case MB_PAR_ODD:
             Parity = UART_PARITY_ODD;
             break;
-        case MB_PARITY_E:
+        case MB_PAR_EVEN:
             Parity = UART_PARITY_EVEN;
             break;
         default:
