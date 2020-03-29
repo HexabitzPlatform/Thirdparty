@@ -357,7 +357,7 @@ eMBPSerialTxEnable( xMBPSerialHandle xSerialHdl, pbMBPSerialTransmitterEmptyCB p
                 /* RS485 transmit mode */
                 RS_485_UART_1_ENABLE_TX(  );
                 /* Enable USART 1 tx interrupt */
-								__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
+								__HAL_UART_ENABLE_IT(&huart1, UART_IT_TXE);
 								RS485_RECEIVER_DIS();
                 break;
 #endif
@@ -387,7 +387,7 @@ eMBPSerialTxEnable( xMBPSerialHandle xSerialHdl, pbMBPSerialTransmitterEmptyCB p
                 /* Disable transmit register empty interrupt */
 								__HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
                 /* Enable transmit complete interrupt */
-								__HAL_UART_DISABLE_IT(&huart1, UART_IT_TC);
+								__HAL_UART_ENABLE_IT(&huart1, UART_IT_TC);
                 break;
 #endif
 #if UART_2_ENABLED == 1
