@@ -221,10 +221,11 @@ eMBPSerialInit( xMBPSerialHandle * pxSerialHdl, UCHAR ucPort, ULONG ulBaudRate,
                 {
                     /* Configure  USART1 */
                     MB_PORT_Init(BaudRate, DataBits, Parity, StopBit);
+										//HAL_RS485Ex_Init(&huart1, UART_DE_POLARITY_HIGH, 1, 1);
 									
                     /* Disable receive and transmit interrupts from the beginning */
-                    //USART_ITConfig( USART1, USART_IT_RXNE, DISABLE );
-                    //USART_ITConfig( USART1, USART_IT_TXE, DISABLE );
+                    __HAL_UART_DISABLE_IT(&huart1, UART_IT_RXNE);
+                    __HAL_UART_DISABLE_IT(&huart1, UART_IT_TXE);
 
                     /* Setup handle to uart */
                     *pxSerialHdl = &xSerialHdls[UART_1_IDX];
@@ -356,9 +357,9 @@ eMBPSerialTxEnable( xMBPSerialHandle xSerialHdl, pbMBPSerialTransmitterEmptyCB p
             case UART_1_IDX:
                 /* RS485 transmit mode */
                 RS_485_UART_1_ENABLE_TX(  );
+								RS485_RECEIVER_DIS();
                 /* Enable USART 1 tx interrupt */
 								__HAL_UART_ENABLE_IT(&huart1, UART_IT_TXE);
-								RS485_RECEIVER_DIS();
                 break;
 #endif
 #if UART_2_ENABLED == 1
@@ -467,33 +468,33 @@ eMBPSerialRxEnable( xMBPSerialHandle xSerialHdl, pvMBPSerialReceiverCB pvMBMRece
     return eStatus;
 }
 
-//#if UART_1_ENABLED == 1
-//void
-//vMBPUSART1ISR( void )
-//{
-//    /* Check for receive interrupt */
-//    if( USART_GetITStatus( USART1, UART_IT_RXNE ) != RESET )
-//    {HAL_UART_GetState(&huart1);
-//        /* Handle data incomming data in modbus functions. Interrupt flag is 
-//         * cleared when byte is read in receive register.
-//         */
-//        prvvMBPUSART1_RXNE_ISR(  );
-//    }
-//    /* Check for transmit interrupt */
-//    if( USART_GetITStatus( USART1, USART_IT_TXE ) != RESET )
-//    {
-//        /* Handle transmission of data in modbus functions. Interrupt flags are
-//         * cleared when new byte is written to transmit register.
-//         */
-//        prvvMBPUSART1_TXE_ISR(  );
-//    }
-//    /* Check for transmit complete */
-//    if( USART_GetITStatus( USART1, UART_IT_TC ) != RESET )
-//    {
-//        /* Handle transmit complete in modbus library */
-//        prvvMBPUSART1_TC_ISR(  );
-//    }
-//}
+#if UART_1_ENABLED == 1
+void
+vMBPUSART1ISR( void )
+{
+    /* Check for receive interrupt */
+    if( ((&huart1)->Instance->ISR, UART_IT_RXNE) != RESET )
+    {
+        /* Handle data incomming data in modbus functions. Interrupt flag is 
+         * cleared when byte is read in receive register.
+         */
+        prvvMBPUSART1_RXNE_ISR(  );
+    }
+    /* Check for transmit interrupt */
+    if( ((&huart1)->Instance->ISR, UART_IT_TXE) != RESET )
+    {
+        /* Handle transmission of data in modbus functions. Interrupt flags are
+         * cleared when new byte is written to transmit register.
+         */
+        prvvMBPUSART1_TXE_ISR(  );
+    }
+    /* Check for transmit complete */
+    if( ((&huart1)->Instance->ISR, UART_IT_TC) != RESET )
+    {
+        /* Handle transmit complete in modbus library */
+        prvvMBPUSART1_TC_ISR(  );
+    }
+}
 
 void
 prvvMBPUSART1_TXE_ISR( void )
@@ -528,6 +529,7 @@ prvvMBPUSART1_TC_ISR( void )
 {
     /* Back to receive mode */
     RS_485_UART_1_DISABLE_TX(  );
+		RS485_RECEIVER_EN();
     /* Transmission complete. Disable interrupt */
     __HAL_UART_DISABLE_IT(&huart1, UART_IT_TC);
 }
@@ -578,6 +580,7 @@ prvvMBPUSART1_RXNE_ISR( void )
     }
 }
 
+#endif
 
 ///* void 
 //prrvUSARTTxISR( void )           //STATIC
