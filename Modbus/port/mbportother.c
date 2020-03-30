@@ -1,24 +1,27 @@
-/* 
- * MODBUS Library: Skeleton port
- * Copyright (c) 2008 Christian Walter <cwalter@embedded-solutions.at>
+/*
+ * MODBUS Library: ARM STM32 Port (FWLIB 2.0x)
+ * Copyright (c) Christian Walter <cwalter@embedded-solutions.at>
  * All rights reserved.
  *
- * $Id: mbportother.c,v 1.1 2008-04-06 07:46:23 cwalter Exp $
+ * ARM STM32 Port by Niels Andersen, Elcanic A/S <niels.andersen.elcanic@gmail.com>
+ *
+ * $Id: mbportother.c,v 1.1 2008-12-14 19:33:32 cwalter Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
 #include <stdlib.h>
-#include "FreeRTOS.h"
-#include "task.h"
-
 
 /* ----------------------- Platform includes --------------------------------*/
 #include "mbport.h"
+#include "common/mbtypes.h"
+#include "common/mbframe.h"
+#include "common/mbutils.h"
 #include "H1DR1.h"
 
 /* ----------------------- Modbus includes ----------------------------------*/
 
 /* ----------------------- Defines ------------------------------------------*/
+#define PORT_INTERRUPT_PRIORITY_MAX     ( 1 )
 
 /* ----------------------- Type definitions ---------------------------------*/
 
@@ -29,6 +32,14 @@ static UBYTE    ubNesting = 0;
 /* ----------------------- Static functions ---------------------------------*/
 
 /* ----------------------- Start implementation -----------------------------*/
+
+void
+assert_failed( uint8_t * file, uint32_t line )
+{
+    ( void )file;
+    ( void )line;
+    vMBPAssert(  );
+}
 
 void
 vMBPAssert( void )
@@ -42,37 +53,13 @@ vMBPAssert( void )
 void
 vMBPEnterCritical( void )
 {
-    /* Disable interrupts and/or scheduler. Disabling interrupts is
-     * necessary if you call ANY of the MODBUS functions from an 
-     * interrupt. Disabling the scheduler is necessary if you call
-     * any of the MODBUS functions from another thread.
-     * In general you should ALWAYS start by disabling both.
-     */
-
-		taskENTER_CRITICAL(  );
-    /* Code for disabling interrupts and the scheduler. */
-    if( ubNesting == 0 )
-    {
-        /* Store old processor status register, ... */
-    }
-    ubNesting++;
+	portENTER_CRITICAL(  );
+	
 }
 
 void
 vMBPExitCritical( void )
 {
-    /* Code for disabling interrupts and the scheduler. */
-    ubNesting--;
-    if( 0 == ubNesting )
-    {
-        /* Check old status register if interrupts have been enabled.
-         * If yes reenable them. Of course the same holds for the
-         * scheduler.
-         */
-        if( 0 /* Interrupts where enabled */ )
-        {
-            /* Code for enabling the interrupts and the scheduler. */
-        }
-    }
-		taskEXIT_CRITICAL(  );
+	portEXIT_CRITICAL(  );
+ 
 }

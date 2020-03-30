@@ -1,9 +1,11 @@
-/* 
- * MODBUS Library: Port skeleton
- * Copyright (c) 2008 Christian Walter <cwalter@embedded-solutions.at>
+/*
+ * MODBUS Library: ARM STM32 Port (FWLIB 2.0x)
+ * Copyright (c) Christian Walter <cwalter@embedded-solutions.at>
  * All rights reserved.
  *
- * $Id: mbportevent.c,v 1.1 2008-04-06 07:46:23 cwalter Exp $
+ * ARM STM32 Port by Niels Andersen, Elcanic A/S <niels.andersen.elcanic@gmail.com>
+ *
+ * $Id: mbportevent.c,v 1.1 2008-12-14 19:33:32 cwalter Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -43,6 +45,7 @@ STATIC xEventInternalHandle arxEventHdls[MAX_EVENT_HDLS];
 /* ----------------------- Static functions ---------------------------------*/
 
 /* ----------------------- Start implementation -----------------------------*/
+
 
 eMBErrorCode
 eMBPEventCreate( xMBPEventHandle * pxEventHdl )
@@ -125,3 +128,4 @@ vMBPEventDelete( xMBPEventHandle xEventHdl )
     }
     MBP_EXIT_CRITICAL_SECTION(  );
 }
+
