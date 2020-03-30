@@ -1,9 +1,11 @@
-/* 
- * MODBUS Library: Port skeletion
- * Copyright (c) 2008 Christian Walter <cwalter@embedded-solutions.at>
+/*
+ * MODBUS Library: ARM STM32 Port (FWLIB 2.0x)
+ * Copyright (c) Christian Walter <cwalter@embedded-solutions.at>
  * All rights reserved.
  *
- * $Id: mbporttimer.c,v 1.1 2008-04-06 07:46:23 cwalter Exp $
+ * ARM STM32 Port by Niels Andersen, Elcanic A/S <niels.andersen.elcanic@gmail.com>
+ *
+ * $Id: mbporttimer.c,v 1.2 2009-01-01 23:37:55 cwalter Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -20,10 +22,17 @@
 #include "common/mbutils.h"
 
 /* ----------------------- Defines ------------------------------------------*/
+#define MBP_DEBUG_TIMER_PERFORMANCE     ( 0 )
 
-#define MAX_TIMER_HDLS          ( 4 )
-#define IDX_INVALID             ( 255 )
-#define TIMER_TIMEOUT_INVALID	( 65535U )
+#define MAX_TIMER_HDLS                  ( 5 )
+#define IDX_INVALID                     ( 255 )
+#define EV_NONE                         ( 0 )
+
+#define TIMER_TIMEOUT_INVALID           ( 65535U )
+#define TIMER_PRESCALER                 ( 128U )
+#define TIMER_XCLK                      ( 72000000U )
+
+#define TIMER_MS2TICKS( xTimeOut )      ( ( TIMER_XCLK * ( xTimeOut ) ) / ( TIMER_PRESCALER * 1000U ) )
 
 #define RESET_HDL( x ) do { \
     ( x )->ubIdx = IDX_INVALID; \
@@ -48,6 +57,7 @@ STATIC xTimerInternalHandle arxTimerHdls[MAX_TIMER_HDLS];
 STATIC BOOL     bIsInitalized = FALSE;
 
 /* ----------------------- Static functions ---------------------------------*/
+void            prvvMBPTimerISR( void ) __attribute__ ( ( __interrupt__ ) );
 
 /* ----------------------- Start implementation -----------------------------*/
 
@@ -65,6 +75,8 @@ eMBPTimerInit( xMBPTimerHandle * xTimerHdl, USHORT usTimeOut1ms,
         if( !bIsInitalized )
         {
             /* Initialize a hardware timer for 1 millisecond. */
+						MX_TIM16_Init();
+					
             for( ubIdx = 0; ubIdx < MB_UTILS_NARRSIZE( arxTimerHdls ); ubIdx++ )
             {
                 RESET_HDL( &arxTimerHdls[ubIdx] );
@@ -89,8 +101,6 @@ eMBPTimerInit( xMBPTimerHandle * xTimerHdl, USHORT usTimeOut1ms,
             arxTimerHdls[ubIdx].pbMBPTimerExpiredFN = pbMBPTimerExpiredFN;
 
             *xTimerHdl = &arxTimerHdls[ubIdx];
-						
-						MX_TIM16_Init();
 					
             eStatus = MB_ENOERR;
         }
@@ -128,6 +138,7 @@ eMBPTimerSetTimeout( xMBPTimerHandle xTimerHdl, USHORT usTimeOut1ms )
     if( MB_IS_VALID_HDL( pxTimerIntHdl, arxTimerHdls ) &&
         ( usTimeOut1ms > 0 ) && ( usTimeOut1ms != TIMER_TIMEOUT_INVALID ) )
     {
+
         pxTimerIntHdl->usNTimeOutMS = usTimeOut1ms;
         eStatus = MB_ENOERR;
     }
@@ -145,7 +156,6 @@ eMBPTimerStart( xMBPTimerHandle xTimerHdl )
     if( MB_IS_VALID_HDL( pxTimerIntHdl, arxTimerHdls ) )
     {
         pxTimerIntHdl->usNTimeLeft = pxTimerIntHdl->usNTimeOutMS;
-				HAL_TIM_Base_Start_IT(&htim16);
         eStatus = MB_ENOERR;
     }
     MBP_EXIT_CRITICAL_SECTION(  );
@@ -162,14 +172,52 @@ eMBPTimerStop( xMBPTimerHandle xTimerHdl )
     if( MB_IS_VALID_HDL( pxTimerIntHdl, arxTimerHdls ) )
     {
         pxTimerIntHdl->usNTimeLeft = TIMER_TIMEOUT_INVALID;
-				HAL_TIM_Base_Stop_IT(&htim16);
         eStatus = MB_ENOERR;
     }
     MBP_EXIT_CRITICAL_SECTION(  );
     return eStatus;
 }
 
- void prvvTimerISR( void )     //STATIC void
+/*
+ * Create an ISR which is called whenever the timer has expired. This function
+ * handles all modbus slave timers.
+ */
+void
+vMBPTimerISR( void )
+{
+    UBYTE           ubIdx;
+
+#if MBP_DEBUG_TIMER_PERFORMANCE == 1
+    STATIC BOOL     bLastState = FALSE;
+#endif
+    /* Servicer update interrupt */
+    if( ((&htim16)->Instance->DIER, TIM_IT_UPDATE) != RESET )
+    {
+#if MBP_DEBUG_TIMER_PERFORMANCE == 1
+        vMBPSetDebugPin( MBP_DEBUGPIN_0, bLastState );
+        bLastState = !bLastState;
+#endif
+        for( ubIdx = 0; ubIdx < MB_UTILS_NARRSIZE( arxTimerHdls ); ubIdx++ )
+        {
+            if( ( IDX_INVALID != arxTimerHdls[ubIdx].ubIdx ) &&
+                ( TIMER_TIMEOUT_INVALID != arxTimerHdls[ubIdx].usNTimeLeft ) )
+            {
+                arxTimerHdls[ubIdx].usNTimeLeft--;
+                if( 0 == arxTimerHdls[ubIdx].usNTimeLeft )
+                {
+                    arxTimerHdls[ubIdx].usNTimeLeft = TIMER_TIMEOUT_INVALID;
+                    ( void )arxTimerHdls[ubIdx].pbMBPTimerExpiredFN( arxTimerHdls[ubIdx].xMBMHdl );
+                }
+            }
+        }
+        /* Clear interrupt flag */
+        //TIM_ClearITPendingBit( TIM3, TIM_IT_Update );
+				CLEAR_BIT((&htim16)->Instance->DIER, TIM_IT_UPDATE);
+    }
+}
+
+
+/* void prvvTimerISR( void )     //STATIC void
 {
     UBYTE           ubIdx;
 
@@ -186,4 +234,4 @@ eMBPTimerStop( xMBPTimerHandle xTimerHdl )
             }
         }
     }
-}
+}*/
