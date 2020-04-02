@@ -98,7 +98,7 @@ STATIC xSerialHandle xSerialHdls[NUARTS];
 STATIC BOOL     bIsInitalized = FALSE;
 
 /* ----------------------- Static functions ---------------------------------*/
-void            vMBPUSART1ISR( void ) __attribute__ ( ( __interrupt__ ) );
+void            vMBPUSART1ISR( void );  //__attribute__ ( ( __interrupt__ ) );
 void     prvvMBPUSART1_TXE_ISR( void );  //STATIC
 void     prvvMBPUSART1_TC_ISR( void );   //STATIC
 void     prvvMBPUSART1_RXNE_ISR( void );  //STATIC
@@ -297,6 +297,7 @@ eMBPSerialClose( xMBPSerialHandle xSerialHdl )
                 HAL_UART_DeInit(&huart1);
                 /* Force RS485 back to receive mode */
                 RS_485_UART_1_DISABLE_TX(  );
+								RS485_RECEIVER_DIS();
                 /* Reset handle */
                 HDL_RESET( pxSerialIntHdl );
                 /* No error */
@@ -500,8 +501,11 @@ void
 prvvMBPUSART1_TXE_ISR( void )
 {
     MBP_ASSERT( IDX_INVALID != xSerialHdls[UART_1_IDX].ubIdx );
-    BOOL            bHasMoreData = TRUE;
+    BOOL            bHasMoreData = TRUE;        //TRUE;
     UBYTE           ubTxByte;
+	
+		// added by Hexabitz H1DR1 firmware
+		HAL_StatusTypeDef ubStatus = 1;
 
     if( NULL != xSerialHdls[UART_1_IDX].pbMBMTransmitterEmptyFN )
     {
@@ -519,7 +523,9 @@ prvvMBPUSART1_TXE_ISR( void )
     else
     {
         /* Transmit byte on USART */
+				//while (ubStatus != HAL_OK){
         HAL_UART_Transmit_IT( &huart1, &ubTxByte, sizeof (ubTxByte) );
+				//}					
     }
 }
 
@@ -547,17 +553,14 @@ prvvMBPUSART1_RXNE_ISR( void )
     {
         fs |= 1;
     }
-		//UART_FLAG_NE
     if( ((&huart1)->Instance->ISR, UART_FLAG_NE) )
     {
         fs |= 2;
     }
-		//UART_FLAG_FE
     if( ((&huart1)->Instance->ISR, UART_FLAG_FE) )
     {
         fs |= 4;
     }
-		//UART_FLAG_PE
     if( ((&huart1)->Instance->ISR, UART_FLAG_PE) )
     {
         fs |= 8;

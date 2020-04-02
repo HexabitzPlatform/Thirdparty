@@ -57,7 +57,7 @@ STATIC xTimerInternalHandle arxTimerHdls[MAX_TIMER_HDLS];
 STATIC BOOL     bIsInitalized = FALSE;
 
 /* ----------------------- Static functions ---------------------------------*/
-void            prvvMBPTimerISR( void ) __attribute__ ( ( __interrupt__ ) );
+void            prvvMBPTimerISR( void ); //__attribute__( (interrupt("IRQ")) );
 
 /* ----------------------- Start implementation -----------------------------*/
 
@@ -76,7 +76,7 @@ eMBPTimerInit( xMBPTimerHandle * xTimerHdl, USHORT usTimeOut1ms,
         {
             /* Initialize a hardware timer for 1 millisecond. */
 						MX_TIM16_Init();
-					
+						__HAL_TIM_ENABLE_IT(&htim16, TIM_IT_UPDATE);
             for( ubIdx = 0; ubIdx < MB_UTILS_NARRSIZE( arxTimerHdls ); ubIdx++ )
             {
                 RESET_HDL( &arxTimerHdls[ubIdx] );
