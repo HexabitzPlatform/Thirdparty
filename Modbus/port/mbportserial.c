@@ -523,6 +523,17 @@ prvvMBPUSART1_TXE_ISR( void )
     else
     {
         /* Transmit byte on USART */
+				/* Check if a receive process is ongoing or not */
+				if(huart1.State == HAL_UART_STATE_BUSY_TX_RX)
+				{
+					huart1.State = HAL_UART_STATE_BUSY_RX;
+				}
+				else
+				{
+					/* Disable the UART Error Interrupt: (Frame error, noise error, overrun error) */
+					__HAL_UART_DISABLE_IT(&huart1, UART_IT_ERR);
+					huart1.State = HAL_UART_STATE_READY;
+				}
 				//while (ubStatus != HAL_OK){
         HAL_UART_Transmit_IT( &huart1, &ubTxByte, sizeof (ubTxByte) );
 				//}					
