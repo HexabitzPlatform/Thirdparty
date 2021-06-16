@@ -1,26 +1,10 @@
 /*
- * COPYRIGHT (C) STMicroelectronics 2014. All rights reserved.
- *
- * This software is the confidential and proprietary information of
- * STMicroelectronics ("Confidential Information").  You shall not
- * disclose such Confidential Information and shall use it only in
- * accordance with the terms of the license agreement you entered into
- * with STMicroelectronics
- *
- * Programming Golden Rule: Keep it Simple!
- *
- */
-
-/**
- * @file   VL53L0X_platform.h
- * @brief  Function prototype definitions for Ewok Platform layer.
- *
- */
-
-/*
-		MODIFIED by Hexabitz for BitzOS (BOS) V0.2.4 - Copyright (C) 2017-2021 Hexabitz
-    All rights reserved
-*/
+ BitzOS (BOS) V0.2.5 - Copyright (C) 2017-2021 Hexabitz
+ All rights reserved
+ 
+ File Name     : VL53L0X_i2c_platform.h
+ Description   : Function prototype definitions for Ewok Platform layer
+ 
 
 
 #ifndef _VL53L0X_I2C_PLATFORM_H_
