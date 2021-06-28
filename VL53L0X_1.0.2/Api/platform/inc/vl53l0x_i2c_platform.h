@@ -4,7 +4,7 @@
  
  File Name     : VL53L0X_i2c_platform.h
  Description   : Function prototype definitions for Ewok Platform layer
- 
+*/
 
 
 #ifndef _VL53L0X_I2C_PLATFORM_H_
