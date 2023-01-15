@@ -585,31 +585,44 @@ static void FLASH_MassErase(uint32_t Banks)
   * @note (*) availability depends on devices
   * @retval None
   */
-void FLASH_PageErase(uint32_t Banks, uint32_t Page)
+void FLASH_PageErase(uint32_t Banks, uint32_t Addr)
 {
-  uint32_t tmp;
+	uint32_t  page=0;
 
-  /* Check the parameters */
-  assert_param(IS_FLASH_BANK(Banks));
-  assert_param(IS_FLASH_PAGE(Page));
+		  while(0 != (FLASH->SR & FLASH_SR_BSY2))
+		  		{
+		  			//Wait
+		  		}
 
-  /* Get configuration register, then clear page number */
-  tmp = (FLASH->CR & ~FLASH_CR_PNB);
+		  	    FLASH->SR |= FLASH_SR_EOP;   //Clear end of operation flag
+		  	    FLASH->SR |= FLASH_SR_WRPERR;      //Clear write protect error flag
+		  	    FLASH->SR |= FLASH_SR_PROGERR; //Clear programming error
 
-#if defined(FLASH_DBANK_SUPPORT)
-  /* Check if page has to be erased in bank 1 or 2 */
-  if (Banks != FLASH_BANK_1)
-  {
-    tmp |= FLASH_CR_BKER;
-  }
-  else
-  {
-    tmp &= ~FLASH_CR_BKER;
-  }
-#endif /* FLASH_DBANK_SUPPORT */
+		  	    FLASH->CR |=FLASH_CR_PER;  // Page erase enable
+		  	   if (Addr < (FLASH_BASE + FLASH_BANK_SIZE))
+		  	   {
+		  	     /* Bank 1 */
+		  		 page = (Addr - FLASH_BASE) / FLASH_PAGE_SIZE;
+		  	     FLASH->CR &= ~FLASH_CR_BKER;// Bank1
+		  	   }
+		  	   else
+		  	   {
+		  	     /* Bank 2 */
+		  	     page = (Addr - (FLASH_BASE + FLASH_BANK_SIZE)) / FLASH_PAGE_SIZE;
+		  	     FLASH->CR |=FLASH_CR_BKER;// Bank2
+		  	   }
 
-  /* Set page number, Page Erase bit & Start bit */
-  FLASH->CR = (tmp | (FLASH_CR_STRT | (Page <<  FLASH_CR_PNB_Pos) | FLASH_CR_PER));
+		        FLASH->CR |=(FLASH_CR_PNB &(((page)<<3))) ;
+		  	    FLASH->CR |=FLASH_CR_STRT;//Start erasing
+
+		  	  while(0 != (FLASH->SR & FLASH_SR_BSY2))
+		  	   	  	    		{
+		  	   	  	    			//Wait
+		  	   	  	    		}
+
+
+		  	   	  	   FLASH->CR &= ~FLASH_CR_PER;  // Page erase disable
+		  	   	  	   FLASH->CR &= 0xC0000000;    // reset CR register
 }
 
 /**
