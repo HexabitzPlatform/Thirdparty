@@ -16,14 +16,25 @@
 
 
 
+
+/* Platform Exported Functions ********************************************/
+uint8_t LSM303AGR_ACC_I2C_Write(void *handle, uint8_t WriteAddr, uint8_t *pBuffer, uint16_t nBytesToWrite);
+uint8_t LSM303AGR_ACC_I2C_Read(void *handle, uint8_t ReadAddr, uint8_t *pBuffer, uint16_t nBytesToRead);
+
+/* Local functions prototypes ********************************************/
 LSM303AGR_Status LSM303MagEnable(void);
 
+/**************************************************************************/
+/* Platform Exported Functions ********************************************/
+/**************************************************************************/
 uint8_t LSM303AGR_ACC_I2C_Write(void *handle,uint8_t WriteAddr,uint8_t *pBuffer,uint16_t nBytesToWrite){
 	if(HAL_I2C_Mem_Write(handle,LSM303AGR_ACC_I2C_ADDRESS,WriteAddr,sizeof(WriteAddr),pBuffer,nBytesToWrite,100) != HAL_OK){
 		return 1;
 	}
 	return 0;
 }
+
+/**********************************************************************/
 
 uint8_t LSM303AGR_ACC_I2C_Read(void *handle,uint8_t ReadAddr,uint8_t *pBuffer,uint16_t nBytesToRead){
 	if(HAL_I2C_Mem_Read(handle,LSM303AGR_ACC_I2C_ADDRESS,ReadAddr,sizeof(ReadAddr),pBuffer,nBytesToRead,100) != HAL_OK){
@@ -32,6 +43,8 @@ uint8_t LSM303AGR_ACC_I2C_Read(void *handle,uint8_t ReadAddr,uint8_t *pBuffer,ui
 	return 0;
 }
 
+/**********************************************************************/
+
 uint8_t LSM303AGR_MAG_I2C_Write(void *handle,uint8_t WriteAddr,uint8_t *pBuffer,uint16_t nBytesToWrite){
 	if(HAL_I2C_Mem_Write(handle,LSM303AGR_MAG_I2C_ADDRESS,WriteAddr,sizeof(WriteAddr),pBuffer,nBytesToWrite,100) != HAL_OK){
 		return 1;
@@ -39,15 +52,19 @@ uint8_t LSM303AGR_MAG_I2C_Write(void *handle,uint8_t WriteAddr,uint8_t *pBuffer,
 	return 0;
 }
 
+/**********************************************************************/
+
 uint8_t LSM303AGR_MAG_I2C_Read(void *handle,uint8_t ReadAddr,uint8_t *pBuffer,uint16_t nBytesToRead){
 	if(HAL_I2C_Mem_Read(handle,LSM303AGR_MAG_I2C_ADDRESS,ReadAddr,sizeof(ReadAddr),pBuffer,nBytesToRead,100) != HAL_OK){
 		return 1;
 	}
 	return 0;
 }
-/*-----------------------------------------------------------*
- *
- */
+
+/**************************************************************************/
+/* Local Functions  *******************************************************/
+/**************************************************************************/
+
 LSM303AGR_Status LSM303MagEnable(void){
 	if(LSM303AGR_MAG_W_MD(&I2CHandle,LSM303AGR_MAG_MD_CONTINUOS_MODE) != LSM303AGR_OK)
 		return LSM303AGR_ERR;
@@ -56,7 +73,9 @@ LSM303AGR_Status LSM303MagEnable(void){
 }
 
 
-/*-----------------------------------------------------------*/
+/**************************************************************************/
+/* Exported functions  ****************************************************/
+/**************************************************************************/
 
 LSM303AGR_Status LSM303MagInit(void){
 
@@ -94,7 +113,7 @@ LSM303AGR_Status LSM303SampleMagRaw(int16_t *magX,int16_t *magY,int16_t *magZ){
 	int16_t *pData;
 	uint8_t data[6];
 
-	memset(data,0,sizeof(data));
+//	memset(data,0,sizeof(data));
 
 	if(LSM303AGR_MAG_Get_Raw_Magnetic(&I2CHandle,data) != LSM303AGR_OK)
 		return LSM303AGR_ERR;
