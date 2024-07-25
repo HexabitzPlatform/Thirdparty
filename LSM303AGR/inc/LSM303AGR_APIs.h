@@ -29,8 +29,8 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 typedef enum {
-	LSM303AGR_OK =0,
-	LSM303AGR_ERR,
+	LSM303AGR_OK =1,
+	LSM303AGR_ERR =2,
 } LSM303AGR_Status;
 
 /* Exported functions  ---------------------------------------------*/
