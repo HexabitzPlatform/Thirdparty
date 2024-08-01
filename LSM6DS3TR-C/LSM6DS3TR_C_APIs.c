@@ -106,11 +106,11 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_SetupGyro(void) {
 LSM6DS3TR_C_Status LSM6DS3TR_C_SetupAcc(void) {
 
 	/* Accelerometer ODR Init */
-	if (lsm6ds3tr_c_xl_data_rate_set(&dev_ctx, LSM6DS3TR_C_XL_ODR_12Hz5) != LSM6DS3TR_C_OK)
+	if (lsm6ds3tr_c_xl_data_rate_set(&dev_ctx, LSM6DS3TR_C_XL_ODR_208Hz) != LSM6DS3TR_C_OK)
 		return LSM6DS3TR_C_ERR;
 
 	/* Accelerometer FS Init */
-	if (lsm6ds3tr_c_xl_full_scale_set(&dev_ctx, LSM6DS3TR_C_2g) != LSM6DS3TR_C_OK)
+	if (lsm6ds3tr_c_xl_full_scale_set(&dev_ctx, LSM6DS3TR_C_8g) != LSM6DS3TR_C_OK)
 		return LSM6DS3TR_C_ERR;
 
 	/* Accelerometer - analog filter */
@@ -122,7 +122,7 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_SetupAcc(void) {
 		return LSM6DS3TR_C_ERR;
 
 	/* Accelerometer - LPF1 + LPF2 path */
-	if (lsm6ds3tr_c_xl_lp2_bandwidth_set(&dev_ctx, LSM6DS3TR_C_XL_LOW_NOISE_LP_ODR_DIV_100) != LSM6DS3TR_C_OK)
+	if (lsm6ds3tr_c_xl_lp2_bandwidth_set(&dev_ctx, LSM6DS3TR_C_XL_LOW_NOISE_LP_ODR_DIV_400) != LSM6DS3TR_C_OK)
 		return LSM6DS3TR_C_ERR;
 
 	return LSM6DS3TR_C_OK;
