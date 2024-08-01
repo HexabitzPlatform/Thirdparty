@@ -79,8 +79,9 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_Enable(void) {
 
 LSM6DS3TR_C_Status LSM6DS3TR_C_SetupGyro(void) {
 
+
 	/* Gyroscope ODR Init */
-	if (lsm6ds3tr_c_gy_data_rate_set(&dev_ctx, LSM6DS3TR_C_GY_ODR_12Hz5) != LSM6DS3TR_C_OK)
+	if (lsm6ds3tr_c_gy_data_rate_set(&dev_ctx, LSM6DS3TR_C_GY_ODR_26Hz) != LSM6DS3TR_C_OK)
 		return LSM6DS3TR_C_ERR;
 
 	/* Gyroscope FS Init */
@@ -95,8 +96,8 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_SetupGyro(void) {
 	 * keep in mind: when initializing the low pass filter of the gyroscope
 	 * in order to de-initialze it you need to reset the the IC configuration by
 	 * un-commenting "lsm6ds3tr_c_reset_set' function in "LSM6DS3TR_C_Enable" function  */
-//	if (lsm6ds3tr_c_gy_band_pass_set(&dev_ctx, LSM6DS3TR_C_HP_16mHz_LP1_LIGHT) != LSM6DS3TR_C_OK)
-//		return LSM6DS3TR_C_ERR;
+	if (lsm6ds3tr_c_gy_band_pass_set(&dev_ctx, LSM6DS3TR_C_HP_DISABLE_LP1_AGGRESSIVE) != LSM6DS3TR_C_OK)
+		return LSM6DS3TR_C_ERR;
 
 	return LSM6DS3TR_C_OK;
 }
