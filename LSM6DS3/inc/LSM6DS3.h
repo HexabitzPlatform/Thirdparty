@@ -90,7 +90,7 @@ typedef enum
 
 /************** Who am I  *******************/
 
-#define LSM6DS3_ACC_GYRO_WHO_AM_I         0x69
+#define LSM6DS3_ACC_GYRO_WHO_AM_I         0x6A
 
 /************** Device Register  *******************/
 
