@@ -61,8 +61,8 @@ int32_t MX_FATFS_Process(void);
 #define APP_SD_UNPLUGGED           -2
 /* USER CODE END Private defines */
 
-extern FATFS USERFatFs;    /* File system object for USER logical drive */
-extern FIL USERFile;       /* File  object for USER */
+//extern FATFS USERFatFs;    /* File system object for USER logical drive */
+//extern FIL USERFile;       /* File  object for USER */
 extern char USERPath[4];   /* USER logical drive path */
 
 #endif /*__APP_FATFS_H */
