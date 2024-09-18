@@ -19,21 +19,20 @@
 
 /* Includes */
 #include "vl53l1_api.h"
-#include "P08R7_i2c.h"
+#include "BOS.h"
 
-#define HANDLER_ToF_I2C          hi2c2
-
-#define ToF_SENSOR_I2C_ADDRESS   0x52
-#define _WAITFORINT() 	         __WFI()
-
-#define TOF_PWR_Pin            GPIO_PIN_4
-#define TOF_PWR_GPIO_Port      GPIOE
-#define TOF_INT_Pin            GPIO_PIN_1
-#define TOF_INT_GPIO_Port      GPIOB
-#define TOF_INT_EXTI_IRQn      EXTI1_IRQn
-#define TOF_XSHUT_Pin          GPIO_PIN_5
-#define TOF_XSHUT_GPIO_Port    GPIOA
-
+//#define HANDLER_ToF_I2C          hi2c2
+//
+//#define ToF_SENSOR_I2C_ADDRESS   0x52
+//#define _WAITFORINT() 	         __WFI()
+//
+//#define TOF_PWR_Pin            GPIO_PIN_4
+//#define TOF_PWR_GPIO_Port      GPIOE
+//#define TOF_INT_Pin            GPIO_PIN_1
+//#define TOF_INT_GPIO_Port      GPIOB
+//#define TOF_INT_EXTI_IRQn      EXTI1_IRQn
+//#define TOF_XSHUT_Pin          GPIO_PIN_5
+//#define TOF_XSHUT_GPIO_Port    GPIOA
 
 //int status;
 typedef GPIO_TypeDef GPIO_HANDLE;
