@@ -136,7 +136,7 @@ extern "C" {
 #endif
 
 #ifndef INCLUDE_xTaskGetIdleTaskHandle
-	#define INCLUDE_xTaskGetIdleTaskHandle 0
+	#define INCLUDE_xTaskGetIdleTaskHandle 1
 #endif
 
 #ifndef INCLUDE_xTaskAbortDelay
@@ -160,7 +160,7 @@ extern "C" {
 #endif
 
 #ifndef INCLUDE_pxTaskGetStackStart
-	#define INCLUDE_pxTaskGetStackStart 0
+	#define INCLUDE_pxTaskGetStackStart 1
 #endif
 
 
