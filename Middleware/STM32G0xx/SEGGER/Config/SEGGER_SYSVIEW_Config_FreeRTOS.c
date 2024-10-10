@@ -76,10 +76,10 @@ extern unsigned int SEGGER_SYSVIEW_TickCnt;
 **********************************************************************
 */
 // The application name to be displayed in SystemViewer
-#define SYSVIEW_APP_NAME        "FreeRTOS Hello World Application"
+#define SYSVIEW_APP_NAME        "FreeRTOS Application"
 
 // The target device name
-#define SYSVIEW_DEVICE_NAME     "Cortex-M0 Plus"
+#define SYSVIEW_DEVICE_NAME     "H01R0 Module"
 
 // Frequency of the timestamp. Must match SEGGER_SYSVIEW_GET_TIMESTAMP in SEGGER_SYSVIEW_Conf.h
 #define SYSVIEW_TIMESTAMP_FREQ  (configCPU_CLOCK_HZ)
