@@ -13,6 +13,7 @@
  */
 
 #include "LSM6DS3TR_C_APIS.h"
+#include "BOS.h"
 
 /* Exported Type's instance  ---------------------------------------------*/
 stmdev_ctx_t dev_ctx;
@@ -32,20 +33,20 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_SetupAcc(void);
 /**************************************************************************/
 /* Platform Exported Functions ********************************************/
 /**************************************************************************/
-int32_t WriteI2C(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len) {
-
-	HAL_I2C_Mem_Write(handle, LSM6DS3TR_C_I2C_ADD_L, reg, sizeof(reg),(uint8_t*) bufp, len, 100);
-
+int32_t WriteI2C(void *handle,uint8_t reg,const uint8_t *bufp,uint16_t len){
+	taskENTER_CRITICAL();
+	HAL_I2C_Mem_Write(handle,LSM6DS3TR_C_I2C_ADD_L,reg,sizeof(reg),(uint8_t* )bufp,len,100);
+	taskEXIT_CRITICAL();
 	return 0;
 }
 
 /**********************************************************************/
 
-int32_t ReadI2C(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len){
-
-	  HAL_I2C_Mem_Read(handle, LSM6DS3TR_C_I2C_ADD_L, reg, sizeof(reg), bufp, len, 100);
-
-    return 0;
+int32_t ReadI2C(void *handle,uint8_t reg,uint8_t *bufp,uint16_t len){
+	taskENTER_CRITICAL();
+	HAL_I2C_Mem_Read(handle,LSM6DS3TR_C_I2C_ADD_L,reg,sizeof(reg),bufp,len,100);
+	taskEXIT_CRITICAL();
+	return 0;
 }
 
 /**********************************************************************/
