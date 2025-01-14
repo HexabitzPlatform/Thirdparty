@@ -61,7 +61,7 @@
 
 /* Description of the 8 Bytes (64 bits) element in flash   */
 /* Bit:  63                  32  31      16  15         0  */
-/*       <--- Data Value ----->  <-unused->  <-VirtAddr->  */
+/*       <--- Data Value ----->  <-  CRC ->  <-VirtAddr->  */
 #define EE_ELEMENT_SIZE         8U                            /*!< Size of element in Bytes */
 #define EE_ELEMENT_TYPE         uint64_t                      /*!< Type of element */
 #define EE_VIRTUALADDRESS_TYPE  uint16_t                      /*!< Type of Virtual Address */
