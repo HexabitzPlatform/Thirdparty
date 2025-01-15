@@ -482,9 +482,7 @@ __STATIC_INLINE uint32_t LL_PWR_IsEnabledVddIO2(void)
 {
   return ((READ_BIT(PWR->CR2, PWR_CR2_IOSV) == (PWR_CR2_IOSV)) ? 1UL : 0UL);
 }
-#endif /* STM32G0C1xx || STM32G0B1xx */
 
-#if defined(PWR_CR2_USV)
 /**
   * @brief  Enable VDDUSB supply
   * @rmtoll CR2          USV           LL_PWR_EnableVddUSB
@@ -514,7 +512,7 @@ __STATIC_INLINE uint32_t LL_PWR_IsEnabledVddUSB(void)
 {
   return ((READ_BIT(PWR->CR2, PWR_CR2_USV) == (PWR_CR2_USV)) ? 1UL : 0UL);
 }
-#endif /* PWR_CR2_USV */
+#endif /* STM32G0C1xx || STM32G0B1xx */
 
 #if defined (PWR_PVM_SUPPORT)
 /**
