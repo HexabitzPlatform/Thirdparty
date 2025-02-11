@@ -13,7 +13,7 @@
  */
 
 #include "LSM303AGR_APIS.h"
-
+#include "BOS.h"
 
 
 
@@ -28,36 +28,48 @@ LSM303AGR_Status LSM303MagEnable(void);
 /* Platform Exported Functions ********************************************/
 /**************************************************************************/
 uint8_t LSM303AGR_ACC_I2C_Write(void *handle,uint8_t WriteAddr,uint8_t *pBuffer,uint16_t nBytesToWrite){
+	taskENTER_CRITICAL();
 	if(HAL_I2C_Mem_Write(handle,LSM303AGR_ACC_I2C_ADDRESS,WriteAddr,sizeof(WriteAddr),pBuffer,nBytesToWrite,100) != HAL_OK){
+		taskEXIT_CRITICAL();
 		return 1;
 	}
+	taskEXIT_CRITICAL();
 	return 0;
 }
 
 /**********************************************************************/
 
 uint8_t LSM303AGR_ACC_I2C_Read(void *handle,uint8_t ReadAddr,uint8_t *pBuffer,uint16_t nBytesToRead){
+	taskENTER_CRITICAL();
 	if(HAL_I2C_Mem_Read(handle,LSM303AGR_ACC_I2C_ADDRESS,ReadAddr,sizeof(ReadAddr),pBuffer,nBytesToRead,100) != HAL_OK){
+		taskEXIT_CRITICAL();
 		return 1;
 	}
+	taskEXIT_CRITICAL();
 	return 0;
 }
 
 /**********************************************************************/
 
 uint8_t LSM303AGR_MAG_I2C_Write(void *handle,uint8_t WriteAddr,uint8_t *pBuffer,uint16_t nBytesToWrite){
+	taskENTER_CRITICAL();
 	if(HAL_I2C_Mem_Write(handle,LSM303AGR_MAG_I2C_ADDRESS,WriteAddr,sizeof(WriteAddr),pBuffer,nBytesToWrite,100) != HAL_OK){
+		taskEXIT_CRITICAL();
 		return 1;
 	}
+	taskEXIT_CRITICAL();
 	return 0;
 }
 
 /**********************************************************************/
 
 uint8_t LSM303AGR_MAG_I2C_Read(void *handle,uint8_t ReadAddr,uint8_t *pBuffer,uint16_t nBytesToRead){
+	taskENTER_CRITICAL();
 	if(HAL_I2C_Mem_Read(handle,LSM303AGR_MAG_I2C_ADDRESS,ReadAddr,sizeof(ReadAddr),pBuffer,nBytesToRead,100) != HAL_OK){
+		taskEXIT_CRITICAL();
 		return 1;
 	}
+	taskEXIT_CRITICAL();
 	return 0;
 }
 
