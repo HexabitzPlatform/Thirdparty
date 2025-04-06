@@ -226,7 +226,7 @@ static portBASE_TYPE prvHelpCommand(int8_t *pcWriteBuffer,size_t xWriteBufferLen
 	
 	/* List parameters */
 	if(pcParameterString1 != NULL && !strncmp((const char* )pcParameterString1,"params",6)){
-		if(str == NumOfParamsHelpStrings){
+		if(str == NUM_OF_PARAMS_HELP_STRINGS){
 			/* Reset the pointer back to the start of the list. */
 			str =0;
 		}
@@ -235,7 +235,7 @@ static portBASE_TYPE prvHelpCommand(int8_t *pcWriteBuffer,size_t xWriteBufferLen
 		 the next command in the list. */
 		strncpy((char* )pcWriteBuffer,(const char* )pcParamsHelpString[str++],xWriteBufferLen);
 		
-		if(str == NumOfParamsHelpStrings){
+		if(str == NUM_OF_PARAMS_HELP_STRINGS){
 			/* There are no more parameters in the list, so there will be no more
 			 strings to return after this one and pdFALSE should be returned. */
 			xReturn = pdFALSE;
@@ -255,9 +255,9 @@ static portBASE_TYPE prvHelpCommand(int8_t *pcWriteBuffer,size_t xWriteBufferLen
 		
 		/* Return the next command help string, before moving the pointer on to
 		 the next command in the list. */
-		if(counter > numOfBosCommands){
+		if(counter > NumOfBosCommands){
 			strncpy(8 + (char* )pcWriteBuffer,(const char* )pxCommand->pxCommandLineDefinition->pcHelpString,xWriteBufferLen - 8);
-			strcpy(1 + (char* )pcWriteBuffer,(char* )modulePNstring[modulePN]);
+			strcpy(1 + (char* )pcWriteBuffer,(char* )ModulePNstring[modulePN]);
 			pcWriteBuffer[0] ='(';
 			pcWriteBuffer[6] =')';
 			pcWriteBuffer[7] =' ';
