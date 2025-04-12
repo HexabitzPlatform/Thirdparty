@@ -257,7 +257,7 @@ static portBASE_TYPE prvHelpCommand(int8_t *pcWriteBuffer,size_t xWriteBufferLen
 		 the next command in the list. */
 		if(counter > NumOfBosCommands){
 			strncpy(8 + (char* )pcWriteBuffer,(const char* )pxCommand->pxCommandLineDefinition->pcHelpString,xWriteBufferLen - 8);
-			strcpy(1 + (char* )pcWriteBuffer,(char* )ModulePNstring[modulePN]);
+			strcpy(1 + (char* )pcWriteBuffer,(char* )ModulePNstring[MODULE_PN]);
 			pcWriteBuffer[0] ='(';
 			pcWriteBuffer[6] =')';
 			pcWriteBuffer[7] =' ';
