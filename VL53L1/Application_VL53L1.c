@@ -353,7 +353,7 @@ Status_TypeDef tofModeMeasurement(VL53L1_DEV Dev, VL53L1_PresetModes PresetMode,
 
 Status_TypeDef IRSensorInit(VL53L1_DEV Dev) {
 
-	Dev->I2cHandle = &HANDLER_ToF_I2C;
+	Dev->I2cHandle = &HANDLER_I2C;
 	Dev->I2cDevAddr = ToF_SENSOR_I2C_ADDRESS;
 
 	ResetGPIOsPin(TOF_XSHUT_GPIO_Port, TOF_XSHUT_Pin);
