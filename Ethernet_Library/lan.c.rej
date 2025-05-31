@@ -1,0 +1,19 @@
+diff a/Ethernet_Library/lan.c b/Ethernet_Library/lan.c	(rejected hunks)
+@@ -5,7 +5,7 @@
+ uint32_t ip_addr = IP_ADDR;
+ uint32_t ip_mask = IP_SUBNET_MASK;
+ uint32_t ip_gateway = IP_DEFAULT_GATEWAY;
+-
++uint32_t ip_dest=IP_DEST;
+ uint8_t net_buf[ENC28J60_MAXFRAME];
+ 
+ uint8_t arp_cache_wr;
+@@ -52,7 +52,7 @@
+ 
+ 	ip->protocol = IP_PROTOCOL_UDP;
+ 	ip->from_addr = ip_addr;
+-	ip->to_addr = IP_DEST;
++	ip->to_addr = ip_dest;
+ 	udp->len = htons(len);
+ 	udp->cksum = 0;
+ 	udp->cksum = ip_cksum(len + IP_PROTOCOL_UDP,(uint8_t*)udp-8, len+8);
