@@ -13,6 +13,7 @@
  */
 
 #include "LSM6DS3TR_C_APIS.h"
+#include "BOS.h"
 
 /* Exported Type's instance  ---------------------------------------------*/
 stmdev_ctx_t dev_ctx;
@@ -32,20 +33,20 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_SetupAcc(void);
 /**************************************************************************/
 /* Platform Exported Functions ********************************************/
 /**************************************************************************/
-int32_t WriteI2C(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len) {
-
-	HAL_I2C_Mem_Write(handle, LSM6DS3TR_C_I2C_ADD_L, reg, sizeof(reg),(uint8_t*) bufp, len, 100);
-
+int32_t WriteI2C(void *handle,uint8_t reg,const uint8_t *bufp,uint16_t len){
+	taskENTER_CRITICAL();
+	HAL_I2C_Mem_Write(handle,LSM6DS3TR_C_I2C_ADD_L,reg,sizeof(reg),(uint8_t* )bufp,len,100);
+	taskEXIT_CRITICAL();
 	return 0;
 }
 
 /**********************************************************************/
 
-int32_t ReadI2C(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len){
-
-	  HAL_I2C_Mem_Read(handle, LSM6DS3TR_C_I2C_ADD_L, reg, sizeof(reg), bufp, len, 100);
-
-    return 0;
+int32_t ReadI2C(void *handle,uint8_t reg,uint8_t *bufp,uint16_t len){
+	taskENTER_CRITICAL();
+	HAL_I2C_Mem_Read(handle,LSM6DS3TR_C_I2C_ADD_L,reg,sizeof(reg),bufp,len,100);
+	taskEXIT_CRITICAL();
+	return 0;
 }
 
 /**********************************************************************/
@@ -79,9 +80,8 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_Enable(void) {
 
 LSM6DS3TR_C_Status LSM6DS3TR_C_SetupGyro(void) {
 
-
 	/* Gyroscope ODR Init */
-	if (lsm6ds3tr_c_gy_data_rate_set(&dev_ctx, LSM6DS3TR_C_GY_ODR_26Hz) != LSM6DS3TR_C_OK)
+	if (lsm6ds3tr_c_gy_data_rate_set(&dev_ctx, LSM6DS3TR_C_GY_ODR_12Hz5) != LSM6DS3TR_C_OK)
 		return LSM6DS3TR_C_ERR;
 
 	/* Gyroscope FS Init */
@@ -96,39 +96,61 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_SetupGyro(void) {
 	 * keep in mind: when initializing the low pass filter of the gyroscope
 	 * in order to de-initialze it you need to reset the the IC configuration by
 	 * un-commenting "lsm6ds3tr_c_reset_set' function in "LSM6DS3TR_C_Enable" function  */
-	if (lsm6ds3tr_c_gy_band_pass_set(&dev_ctx, LSM6DS3TR_C_HP_DISABLE_LP1_AGGRESSIVE) != LSM6DS3TR_C_OK)
-		return LSM6DS3TR_C_ERR;
+//	if (lsm6ds3tr_c_gy_band_pass_set(&dev_ctx, LSM6DS3TR_C_HP_16mHz_LP1_LIGHT) != LSM6DS3TR_C_OK)
+//		return LSM6DS3TR_C_ERR;
 
 	return LSM6DS3TR_C_OK;
 }
 
 /**********************************************************************/
 
-LSM6DS3TR_C_Status LSM6DS3TR_C_SetupAcc(void) {
 
-	/* Accelerometer ODR Init */
-	if (lsm6ds3tr_c_xl_data_rate_set(&dev_ctx, LSM6DS3TR_C_XL_ODR_208Hz) != LSM6DS3TR_C_OK)
-		return LSM6DS3TR_C_ERR;
-
-	/* Accelerometer FS Init */
-	if (lsm6ds3tr_c_xl_full_scale_set(&dev_ctx, LSM6DS3TR_C_8g) != LSM6DS3TR_C_OK)
-		return LSM6DS3TR_C_ERR;
-
-	/* Accelerometer - analog filter */
-	if (lsm6ds3tr_c_xl_filter_analog_set(&dev_ctx, LSM6DS3TR_C_XL_ANA_BW_400Hz) != LSM6DS3TR_C_OK)
-		return LSM6DS3TR_C_ERR;
-
-	/* Accelerometer - LPF1 path ( LPF2 not used )*/
-	if (lsm6ds3tr_c_xl_lp1_bandwidth_set(&dev_ctx, LSM6DS3TR_C_XL_LP1_ODR_DIV_4) != LSM6DS3TR_C_OK)
-		return LSM6DS3TR_C_ERR;
-
-	/* Accelerometer - LPF1 + LPF2 path */
-	if (lsm6ds3tr_c_xl_lp2_bandwidth_set(&dev_ctx, LSM6DS3TR_C_XL_LOW_NOISE_LP_ODR_DIV_400) != LSM6DS3TR_C_OK)
-		return LSM6DS3TR_C_ERR;
-
-	return LSM6DS3TR_C_OK;
-
+// Function to set offset values for the three axes
+int32_t set_offsets(stmdev_ctx_t *dev_ctx, int16_t x_offset, int16_t y_offset, int16_t z_offset) {
+    // Write X offset
+    if (lsm6ds3tr_c_write_reg(dev_ctx, LSM6DS3TR_C_X_OFS_USR, (uint8_t*)&x_offset, 1) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+    // Write Y offset
+    if (lsm6ds3tr_c_write_reg(dev_ctx, LSM6DS3TR_C_Y_OFS_USR, (uint8_t*)&y_offset, 1) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+    // Write Z offset
+    if (lsm6ds3tr_c_write_reg(dev_ctx, LSM6DS3TR_C_Z_OFS_USR, (uint8_t*)&z_offset, 1) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+    return LSM6DS3TR_C_OK;
 }
+
+// LSM6DS3TR_C_XL_ODR_52Hz  LSM6DS3TR_C_2g LSM6DS3TR_C_XL_ANA_BW_400Hz LSM6DS3TR_C_XL_LP1_ODR_DIV_4 LSM6DS3TR_C_XL_LOW_NOISE_LP_ODR_DIV_100
+LSM6DS3TR_C_Status LSM6DS3TR_C_SetupAcc(void) {  /* Accelerometer ODR Init */
+    if (lsm6ds3tr_c_xl_data_rate_set(&dev_ctx, LSM6DS3TR_C_XL_ODR_12Hz5) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+
+    /* Accelerometer FS Init */
+    if (lsm6ds3tr_c_xl_full_scale_set(&dev_ctx, LSM6DS3TR_C_2g) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+
+    /* Accelerometer - analog filter */
+    if (lsm6ds3tr_c_xl_filter_analog_set(&dev_ctx, LSM6DS3TR_C_XL_ANA_BW_400Hz) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+
+    /* Accelerometer - LPF1 path ( LPF2 not used )*/
+    if (lsm6ds3tr_c_xl_lp1_bandwidth_set(&dev_ctx, LSM6DS3TR_C_XL_LP1_ODR_DIV_4) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+
+    /* Accelerometer - LPF1 + LPF2 path */
+    if (lsm6ds3tr_c_xl_lp2_bandwidth_set(&dev_ctx, LSM6DS3TR_C_XL_LOW_NOISE_LP_ODR_DIV_100) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+
+    // Set offset values (you can adjust these values as needed)
+    int16_t x_offset = 0; // X-axis offset value
+    int16_t y_offset = 0; // Y-axis offset value
+    int16_t z_offset = 0; // Z-axis offset value
+
+    if (set_offsets(&dev_ctx, x_offset, y_offset, z_offset) != LSM6DS3TR_C_OK)
+        return LSM6DS3TR_C_ERR;
+
+    return LSM6DS3TR_C_OK;
+}
+
 
 /**************************************************************************/
 /* Exported functions  ****************************************************/

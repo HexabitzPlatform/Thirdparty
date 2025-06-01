@@ -37,6 +37,9 @@ typedef enum {
 /* Exported functions  ---------------------------------------------*/
 LSM6DS3TR_C_Status LSM6DS3TR_C_Init(void);
 
+int32_t set_offsets(stmdev_ctx_t *dev_ctx, int16_t x_offset, int16_t y_offset, int16_t z_offset);
+
+
 LSM6DS3TR_C_Status LSM6DS3TR_C_SampleGyroDPS(float *gyroX, float *gyroY, float *gyroZ);
 LSM6DS3TR_C_Status LSM6DS3TR_C_SampleGyroRaw(int16_t *gyroX, int16_t *gyroY, int16_t *gyroZ);
 
