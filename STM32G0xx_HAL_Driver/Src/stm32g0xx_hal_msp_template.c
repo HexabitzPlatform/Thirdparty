@@ -45,7 +45,7 @@
   * @brief  Initialize the Global MSP.
   * @retval None
   */
-void HAL_MspInit(void)
+__WEAK void HAL_MspInit(void)
 {
   /* NOTE : This function is generated automatically by STM32CubeMX and eventually
             modified by the user
