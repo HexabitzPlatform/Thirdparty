@@ -79,7 +79,8 @@ LSM6DS3TR_C_Status LSM6DS3TR_C_Enable(void) {
 /**********************************************************************/
 
 LSM6DS3TR_C_Status LSM6DS3TR_C_SetupGyro(void) {
-
+	if(lsm6ds3tr_c_reset_set(&dev_ctx,PROPERTY_ENABLE) != LSM6DS3TR_C_OK)
+			return LSM6DS3TR_C_ERR;
 	/* Gyroscope ODR Init */
 	if (lsm6ds3tr_c_gy_data_rate_set(&dev_ctx, LSM6DS3TR_C_GY_ODR_12Hz5) != LSM6DS3TR_C_OK)
 		return LSM6DS3TR_C_ERR;
