@@ -25,7 +25,7 @@
 #define RANGE_OK 				0	/* chosen LED exist */
 #define LED_START_FRAME_SIZE 	4
 #define LED_END_FRAME_SIZE 		4
-#define INTINSITY_LED           100  /* maximum intensity 31 */
+#define INTINSITY_LED           10  /* maximum intensity 10 */
 
 /* Type Definition *********************************************************/
 typedef union {
